@@ -10,7 +10,11 @@
   "devDependencies": {
     "chai": "^5.1.2",
     "concurrently": "^7.0.0",
-    "mocha": "^11.0.1"
+    "cross-env": "^10.0.0",
+    "jest": "^30.0.5",
+    "mocha": "^11.0.1",
+    "mongodb-memory-server": "^10.2.0",
+    "supertest": "^7.1.4"
   },
   "author": "Task Manager Team",
   "license": "ISC"
