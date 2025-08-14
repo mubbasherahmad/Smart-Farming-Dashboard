@@ -3,7 +3,10 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
-
+const allowedOrigins = [
+  "http://localhost:3000",           // dev frontend
+  "https://your-frontend.com"        // deployed frontend
+];
 dotenv.config();
 
 
@@ -15,7 +18,10 @@ app.use('/api/auth', require('./routes/authRoutes'));
 // Add this line with your other route imports
 app.use('/api/sensors', require('./routes/sensorRoutes'));
 //app.use('/api/tasks', require('./routes/taskRoutes'));
-
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 // Export the app object for testing
 if (require.main === module) {
     connectDB();
@@ -23,6 +29,8 @@ if (require.main === module) {
     const PORT = process.env.PORT || 5001;
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   }
+
+
 
 
 module.exports = app
