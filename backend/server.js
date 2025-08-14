@@ -1,11 +1,11 @@
-
+import cors from "cors";
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const allowedOrigins = [
   "http://localhost:3000",           // dev frontend
-  "https://your-frontend.com"        // deployed frontend
+  "http://13.210.133.33:5001"        // deployed frontend
 ];
 dotenv.config();
 
