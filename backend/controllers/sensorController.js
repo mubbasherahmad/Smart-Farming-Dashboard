@@ -27,6 +27,20 @@ const createSensorReading = async (req, res) => {
   }
 };
 
+const getSensorReadings = async (req, res) => {
+  try {
+    const readings = await SensorReading.find({})
+      .sort({ timestamp: -1 })
+      .limit(50);
+    res.json(readings);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// Add to exports
 module.exports = {
-  createSensorReading
+  createSensorReading,
+  getSensorReadings
 };
