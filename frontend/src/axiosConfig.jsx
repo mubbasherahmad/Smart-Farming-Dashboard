@@ -1,9 +1,21 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://13.210.133.33:5001', // local
-  //baseURL: 'http://3.26.96.188:5001', // live
+  baseURL: 'http://localhost:5001', // local
   headers: { 'Content-Type': 'application/json' },
 });
 
+// Interceptor to attach token automatically
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token'); // saved after login
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export default axiosInstance;
+

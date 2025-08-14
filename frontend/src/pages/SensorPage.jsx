@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import axiosInstance from "../axiosInstance";
 
 const SensorPage = () => {
   const { user } = useAuth();
   const [readings, setReadings] = useState([]);
   const [formData, setFormData] = useState({
-    sensorId: '',
-    type: 'temperature',
-    value: '',
-    location: ''
+    sensorId: "",
+    type: "temperature",
+    value: "",
+    location: "",
   });
   const [error, setError] = useState(null);
 
@@ -16,64 +17,40 @@ const SensorPage = () => {
   useEffect(() => {
     const fetchReadings = async () => {
       try {
-        const response = await fetch('/api/sensors', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const data = await response.json();
+        const { data } = await axiosInstance.get("/sensors");
         setReadings(data);
       } catch (err) {
-        setError('Failed to fetch sensor readings');
+        setError("Failed to fetch sensor readings");
       }
     };
 
-    if (user) {
-      fetchReadings();
-    }
+    if (user) fetchReadings();
   }, [user]);
 
+  // Submit new sensor reading
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/sensors', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || errorData.errors?.[0]?.msg || 'Failed to create reading');
-      }
-
-      const newReading = await response.json();
-      setReadings([newReading, ...readings]);
-      setFormData({
-        sensorId: '',
-        type: 'temperature',
-        value: '',
-        location: ''
-      });
+      const { data } = await axiosInstance.post("/sensors", formData);
+      setReadings([data, ...readings]);
+      setFormData({ sensorId: "", type: "temperature", value: "", location: "" });
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.response?.data?.message ||
+        err.response?.data?.errors?.[0]?.msg ||
+        err.message
+      );
     }
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Sensor Readings</h1>
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
@@ -81,61 +58,48 @@ const SensorPage = () => {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Create Sensor Form */}
+        {/* Form */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Add New Reading</h2>
           <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2">Sensor ID</label>
-              <input
-                type="text"
-                name="sensorId"
-                value={formData.sensorId}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded"
-                required
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2">Type</label>
-              <select
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded"
-                required
-              >
-                <option value="temperature">Temperature</option>
-                <option value="humidity">Humidity</option>
-                <option value="soil_moisture">Soil Moisture</option>
-                <option value="light">Light</option>
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2">Value</label>
-              <input
-                type="number"
-                name="value"
-                value={formData.value}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded"
-                required
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2">Location (optional)</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded"
-              />
-            </div>
-
+            <input
+              type="text"
+              name="sensorId"
+              value={formData.sensorId}
+              onChange={handleChange}
+              placeholder="Sensor ID"
+              required
+              className="w-full px-3 py-2 border rounded mb-4"
+            />
+            <select
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border rounded mb-4"
+            >
+              <option value="temperature">Temperature</option>
+              <option value="humidity">Humidity</option>
+              <option value="soil_moisture">Soil Moisture</option>
+              <option value="light">Light</option>
+            </select>
+            <input
+              type="number"
+              name="value"
+              value={formData.value}
+              onChange={handleChange}
+              placeholder="Value"
+              required
+              className="w-full px-3 py-2 border rounded mb-4"
+            />
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              placeholder="Location (optional)"
+              className="w-full px-3 py-2 border rounded mb-4"
+            />
             <button
               type="submit"
               className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
@@ -145,7 +109,7 @@ const SensorPage = () => {
           </form>
         </div>
 
-        {/* Readings List */}
+        {/* List */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Recent Readings</h2>
           {readings.length === 0 ? (
