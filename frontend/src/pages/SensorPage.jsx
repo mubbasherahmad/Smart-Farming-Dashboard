@@ -220,6 +220,15 @@ const SensorPage = () => {
     });
     setEditId(sensor._id);
   };
+  const handleDelete = async (reading) => {
+  try {
+    await axiosInstance.delete(`/sensors/${reading._id}`);
+    setReadings(readings.filter(r => r._id !== reading._id));
+    setError(null);
+  } catch (err) {
+    setError(err.response?.data?.message || "Failed to delete sensor");
+  }
+};
 
   return (
     <div className="container mx-auto p-4">
@@ -332,6 +341,13 @@ const SensorPage = () => {
                   >
                     Edit
                   </button>
+                  <button
+                    onClick={() => handleDelete(reading)}  // Passing the whole reading object like edit does
+                    className="mt-2 ml-2 text-red-600 hover:underline text-sm"
+                  >
+                    Delete
+                  </button>
+
                 </div>
               ))}
             </div>
