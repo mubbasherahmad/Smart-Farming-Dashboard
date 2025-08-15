@@ -57,10 +57,25 @@ const updateSensorReading = async (req, res) => {
     res.status(500).json({ message: "Error updating sensor", error });
   }
 };
+const deleteSensorReading = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await SensorReading.findByIdAndDelete(id);
+    
+    if (!deleted) {
+      return res.status(404).json({ message: "Sensor not found" });
+    }
+    
+    res.json({ message: "Sensor deleted successfully", id });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting sensor", error });
+  }
+};
 
 // Add to exports
 module.exports = {
   createSensorReading,
   getSensorReadings,
-  updateSensorReading
+  updateSensorReading,
+  deleteSensorReading,
 };

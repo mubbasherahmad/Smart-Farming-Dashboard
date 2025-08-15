@@ -19,7 +19,7 @@ const {
   createSensorReading,
   getSensorReadings,
   updateSensorReading,
-} = require("../controllers/sensorController");
+  deleteSensorReading} = require("../controllers/sensorController");
 
 const router = express.Router();
 
@@ -31,5 +31,5 @@ router.get("/", protect, getSensorReadings);
 
 // Update sensor metadata
 router.put("/:id", protect, updateSensorReading);
-
+router.delete("/:id", protect, deleteSensorReading);
 module.exports = router;
