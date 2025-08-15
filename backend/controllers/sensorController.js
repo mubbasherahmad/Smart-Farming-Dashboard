@@ -38,9 +38,29 @@ const getSensorReadings = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+const updateSensorReading = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body; // e.g. { sensorId, type, value, location }
+
+    const updated = await SensorReading.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updated) {
+      return res.status(404).json({ message: "Sensor not found" });
+    }
+
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating sensor", error });
+  }
+};
 
 // Add to exports
 module.exports = {
   createSensorReading,
-  getSensorReadings
+  getSensorReadings,
+  updateSensorReading
 };
