@@ -47,7 +47,11 @@ jobs:
         else
           echo "No PM2 processes running."
         fi
-
+    - name: Cleanup before install
+      run: |
+        yarn cache clean --force
+        npm cache clean --force
+        rm -rf node_modules/
     # Install dependencies for backend
     - name: Install Backend Dependencies
       working-directory: ./backend
