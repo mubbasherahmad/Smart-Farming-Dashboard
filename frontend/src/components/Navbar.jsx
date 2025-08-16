@@ -16,10 +16,9 @@ const Navbar = () => {
       <div>
         {user ? (
           <>
-            <Link to="/tasks" className="mr-4">CRUD</Link>
-            <Link to="/profile" className="mr-4">Profile</Link>
             <Link to="/sensors" className="mr-4">Sensors</Link>
             <Link to="/irrigation" className="mr-4">Irrigation</Link>
+            <Link to="/profile" className="mr-4">Profile</Link>
             <button
               onClick={handleLogout}
               className="bg-red-500 px-4 py-2 rounded hover:bg-red-700"
