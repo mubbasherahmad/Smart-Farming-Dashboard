@@ -5,7 +5,8 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const allowedOrigins = [
   "http://localhost:3000",           // dev frontend
-  "http://54.206.54.119:5001"        // deployed frontend
+  "http://54.206.54.119:5001",
+  "http://54.206.54.119"         // deployed frontend
 ];
 dotenv.config();
 
@@ -28,7 +29,8 @@ if (require.main === module) {
     connectDB();
     // If the file is run directly, start the server
     const PORT = process.env.PORT || 5001;
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+
   }
 
 
