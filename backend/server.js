@@ -5,7 +5,7 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const allowedOrigins = [
   "http://localhost:3000",           // dev frontend
-  "http://13.238.116.205:5001"        // deployed frontend
+  "http://54.206.54.119:5001"        // deployed frontend
 ];
 dotenv.config();
 
