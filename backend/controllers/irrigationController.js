@@ -26,7 +26,17 @@ const createIrrigationSchedule = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
-
+const getIrrigationSchedules = async (req, res) => {
+  try {
+    const schedules = await IrrigationSchedule.find({ createdBy: req.user.id })
+      .sort({ startTime: 1 }); // Sort by start time ascending
+    res.json(schedules);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
 module.exports = {
-  createIrrigationSchedule
+  createIrrigationSchedule,
+  getIrrigationSchedules
 };
