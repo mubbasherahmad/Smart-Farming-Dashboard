@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import axiosInstance from "../axiosInstance";
 
@@ -9,8 +10,36 @@ const IrrigationPage = () => {
     startTime: "",
     duration: "",
   });
+  const [schedules, setSchedules] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+
+  // Fetch schedules on component mount
+  useEffect(() => {
+    if (user) {
+      fetchSchedules();
+    }
+  }, [user]);
+
+  const fetchSchedules = async () => {
+  setLoading(true);
+  try {
+    const response = await axiosInstance.get("/irrigation/schedules");
+    setSchedules(response.data);
+    setError(null);
+  } catch (err) {
+    console.error("Error fetching schedules:", err);
+    setError(
+      err.response?.data?.message ||
+      err.message ||
+      "Failed to fetch schedules. Please try again later."
+    );
+    setSchedules([]); // Clear existing schedules on error
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +52,7 @@ const IrrigationPage = () => {
         duration: "",
       });
       setError(null);
+      fetchSchedules(); // Refresh the list after creation
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -37,9 +67,21 @@ const IrrigationPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const formatDateTime = (dateTimeString) => {
+    const options = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    };
+    return new Date(dateTimeString).toLocaleString(undefined, options);
+  };
+  
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Irrigation Control</h1>
@@ -79,77 +121,131 @@ const IrrigationPage = () => {
           )}
         </div>
 
-        {/* Form Card */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-800">Create New Irrigation Schedule</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Create Schedule Card */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800">Create New Schedule</h2>
+            </div>
+            
+            <div className="p-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label htmlFor="zone" className="block text-sm font-medium text-gray-700 mb-1">
+                    Zone
+                  </label>
+                  <select
+                    id="zone"
+                    name="zone"
+                    value={formData.zone}
+                    onChange={handleChange}
+                    required
+                    className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="zone1">Zone 1 - North Field</option>
+                    <option value="zone2">Zone 2 - South Field</option>
+                    <option value="zone3">Zone 3 - East Field</option>
+                    <option value="zone4">Zone 4 - West Field</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date & Time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    id="startTime"
+                    name="startTime"
+                    value={formData.startTime}
+                    onChange={handleChange}
+                    required
+                    className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-1">
+                    Duration (minutes)
+                  </label>
+                  <input
+                    type="number"
+                    id="duration"
+                    name="duration"
+                    value={formData.duration}
+                    onChange={handleChange}
+                    placeholder="e.g. 30"
+                    min="1"
+                    max="120"
+                    required
+                    className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">Duration must be between 1-120 minutes</p>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${!user ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'}`}
+                    disabled={!user}
+                  >
+                    {user ? 'Create Irrigation Schedule' : 'Please log in to create schedule'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-          
-          <div className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="zone" className="block text-sm font-medium text-gray-700 mb-1">
-                  Zone
-                </label>
-                <select
-                  id="zone"
-                  name="zone"
-                  value={formData.zone}
-                  onChange={handleChange}
-                  required
-                  className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="zone1">Zone 1 - North Field</option>
-                  <option value="zone2">Zone 2 - South Field</option>
-                  <option value="zone3">Zone 3 - East Field</option>
-                  <option value="zone4">Zone 4 - West Field</option>
-                </select>
-              </div>
 
-              <div>
-                <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Date & Time
-                </label>
-                <input
-                  type="datetime-local"
-                  id="startTime"
-                  name="startTime"
-                  value={formData.startTime}
-                  onChange={handleChange}
-                  required
-                  className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-1">
-                  Duration (minutes)
-                </label>
-                <input
-                  type="number"
-                  id="duration"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleChange}
-                  placeholder="e.g. 30"
-                  min="1"
-                  max="120"
-                  required
-                  className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="mt-1 text-xs text-gray-500">Duration must be between 1-120 minutes</p>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${!user ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'}`}
-                  disabled={!user}
-                >
-                  {user ? 'Create Irrigation Schedule' : 'Please log in to create schedule'}
-                </button>
-              </div>
-            </form>
+          {/* View Schedules Card */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-800">Current Schedules</h2>
+              <button 
+                onClick={fetchSchedules}
+                className="text-sm text-blue-600 hover:text-blue-800"
+                disabled={loading}
+              >
+                {loading ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {loading && schedules.length === 0 ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                </div>
+              ) : schedules.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No irrigation schedules found
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {schedules.map((schedule) => (
+                    <div key={schedule._id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-gray-800">
+                            {schedule.zone === 'zone1' && 'Zone 1 - North Field'}
+                            {schedule.zone === 'zone2' && 'Zone 2 - South Field'}
+                            {schedule.zone === 'zone3' && 'Zone 3 - East Field'}
+                            {schedule.zone === 'zone4' && 'Zone 4 - West Field'}
+                          </h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            <span className="font-medium">Start:</span> {formatDateTime(schedule.startTime)}
+                          </p>
+                        </div>
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                          {schedule.duration} min
+                        </span>
+                      </div>
+                      <div className="mt-2 text-xs text-gray-500">
+                        Created: {new Date(schedule.createdAt).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
