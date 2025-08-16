@@ -22,7 +22,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Set up Node.js
+    # Set up Node.jss
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
