@@ -62,8 +62,25 @@ const updateIrrigationSchedule = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+const deleteIrrigationSchedule = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await IrrigationSchedule.findByIdAndDelete(id);
+    
+    if (!deleted) {
+      return res.status(404).json({ message: "Schedule not found" });
+    }
+    
+    res.json({ message: "Schedule deleted successfully", id });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   createIrrigationSchedule,
   getIrrigationSchedules,
-  updateIrrigationSchedule
+  updateIrrigationSchedule,
+  deleteIrrigationSchedule
 };
