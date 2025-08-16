@@ -36,7 +36,34 @@ const getIrrigationSchedules = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+const updateIrrigationSchedule = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const { id } = req.params;
+    const { zone, startTime, duration } = req.body;
+
+    const updated = await IrrigationSchedule.findByIdAndUpdate(
+      id,
+      { zone, startTime, duration },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Schedule not found" });
+    }
+
+    res.json(updated);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
 module.exports = {
   createIrrigationSchedule,
-  getIrrigationSchedules
+  getIrrigationSchedules,
+  updateIrrigationSchedule
 };
